@@ -3,14 +3,13 @@ import { showCheck } from '../../utils/show-check';
 import { isChangePasswordCall } from '../../utils/api';
 
 /**
- * Page Object for the "Change password" dialog, opened from the key icon in the dashboard sidebar.
+ * Component for the "Change password" dialog, opened from the key icon in the dashboard sidebar.
  * Fields: Current password, New password, Confirm new password.
  * Policy shown in the dialog: at least 10 characters, 1 letter, 1 number, 1 special character.
  * On success the app closes the dialog (no toast was observed) and the user stays signed in.
  */
-export class ChangePasswordDialog {
+export class ChangePasswordDialogComponent {
   readonly page: Page;
-  readonly openButton: Locator;
   readonly dialog: Locator;
   readonly currentPasswordInput: Locator;
   readonly newPasswordInput: Locator;
@@ -20,7 +19,6 @@ export class ChangePasswordDialog {
 
   constructor(page: Page) {
     this.page = page;
-    this.openButton = page.getByRole('button', { name: 'Change password' });
     this.dialog = page.getByRole('dialog', { name: 'Change password' });
     this.currentPasswordInput = this.dialog.getByRole('textbox', { name: 'Current password' });
     // exact: "Confirm new password" also contains "new password".
@@ -30,8 +28,8 @@ export class ChangePasswordDialog {
     this.cancelButton = this.dialog.getByRole('button', { name: 'Cancel' });
   }
 
-  async open() {
-    await this.openButton.click();
+  /** The dialog is opened from the sidebar (SidebarComponent.openChangePassword). */
+  async expectOpen() {
     await expect(this.dialog).toBeVisible();
     await showCheck(this.dialog);
   }

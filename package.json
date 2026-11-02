@@ -1,22 +1,32 @@
 {
-  "name": "revocall-portal",
+  "name": "revocall-portal-e2e",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Playwright + TypeScript end-to-end tests for the RevoCall Admin portal (staging).",
   "scripts": {
     "test": "playwright test",
-    "test:smoke": "playwright test --grep @smoke",
+    "test:smoke": "playwright test --grep @smoke --grep-invert @flaky",
     "test:regression": "playwright test --grep @regression",
     "test:demo": "DEMO=1 playwright test --headed",
     "test:ui": "playwright test --ui",
-    "report": "playwright show-report"
+    "report": "playwright show-report",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.63.0",
-    "@types/node": "^26.6.3"
+    "@types/node": "^26.6.3",
+    "eslint": "^10.14.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-playwright": "^2.12.1",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.1"
   }
 }

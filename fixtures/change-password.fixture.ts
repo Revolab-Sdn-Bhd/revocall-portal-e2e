@@ -2,8 +2,8 @@ import { type Browser } from '@playwright/test';
 import { test as loginTest, expect } from './login.fixture';
 import { readTestData } from './base.fixture';
 import { LoginPage } from '../pages/login/LoginPage';
-import { DashboardPage } from '../pages/dashboard/DashboardPage';
-import { ChangePasswordDialog } from '../pages/dashboard/ChangePasswordDialog';
+import { SidebarComponent } from '../pages/components/SidebarComponent';
+import { ChangePasswordDialogComponent } from '../pages/components/ChangePasswordDialogComponent';
 
 /*
  * Fixture for the change-password test (AT-LOGIN-004). Starts logged out (login.fixture).
@@ -56,18 +56,19 @@ function loadChangePwdUser(): ChangePwdUser {
  */
 async function ensureOriginalPassword(
   browser: Browser,
+  baseURL: string | undefined,
   loginUrl: string,
   user: ChangePwdUser,
   state: PasswordGuard['state'],
 ) {
   if (state === 'original') return;
 
-  const context = await browser.newContext({ storageState: { cookies: [], origins: [] } });
+  const context = await browser.newContext({ baseURL, storageState: { cookies: [], origins: [] } });
   try {
     const page = await context.newPage();
     const loginPage = new LoginPage(page, loginUrl);
-    const dashboardPage = new DashboardPage(page, new URL(loginUrl).origin);
-    const dialog = new ChangePasswordDialog(page);
+    const sidebar = new SidebarComponent(page);
+    const dialog = new ChangePasswordDialogComponent(page);
 
     await loginPage.goto();
     await loginPage.enterEmail(user.email);
@@ -91,10 +92,11 @@ async function ensureOriginalPassword(
     await loginPage.finishSignIn(user.organization);
 
     if (activePassword === user.temporaryPassword) {
-      await dialog.open();
+      await sidebar.openChangePassword();
+      await dialog.expectOpen();
       await dialog.changePassword(user.temporaryPassword, user.originalPassword);
     }
-    await expect(dashboardPage.signOutButton).toBeVisible();
+    await expect(sidebar.signOutButton).toBeVisible();
   } finally {
     await context.close();
   }
@@ -103,7 +105,7 @@ async function ensureOriginalPassword(
 type ChangePasswordFixtures = {
   changePwdUser: ChangePwdUser;
   passwordGuard: PasswordGuard;
-  changePasswordDialog: ChangePasswordDialog;
+  changePasswordDialog: ChangePasswordDialogComponent;
   /* Auto fixture: recovers before the test and restores the original password after it. */
   restoreOriginalPassword: void;
 };
@@ -118,16 +120,22 @@ export const test = loginTest.extend<ChangePasswordFixtures>({
   },
 
   changePasswordDialog: async ({ page }, use) => {
-    await use(new ChangePasswordDialog(page));
+    await use(new ChangePasswordDialogComponent(page));
   },
 
   restoreOriginalPassword: [
-    async ({ browser, loginData, changePwdUser, passwordGuard }, use) => {
+    async ({ browser, baseURL, loginData, changePwdUser, passwordGuard }, use) => {
       // Before: a crashed earlier run may have left the account on TEMPORARY.
-      await ensureOriginalPassword(browser, loginData.url, changePwdUser, 'unknown');
+      await ensureOriginalPassword(browser, baseURL, loginData.url, changePwdUser, 'unknown');
       await use();
       // After: always, even when the test failed half way.
-      await ensureOriginalPassword(browser, loginData.url, changePwdUser, passwordGuard.state);
+      await ensureOriginalPassword(
+        browser,
+        baseURL,
+        loginData.url,
+        changePwdUser,
+        passwordGuard.state,
+      );
     },
     { auto: true, timeout: 90_000 },
   ],

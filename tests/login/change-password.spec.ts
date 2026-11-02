@@ -9,7 +9,15 @@ test.describe('Login - change password', { tag: '@regression' }, () => {
   test(
     'should sign in with the new password after changing it',
     { tag: '@AT-LOGIN-004' },
-    async ({ loginPage, loginData, dashboardPage, changePasswordDialog, changePwdUser, passwordGuard }) => {
+    async ({
+      loginPage,
+      loginData,
+      dashboardPage,
+      sidebar,
+      changePasswordDialog,
+      changePwdUser,
+      passwordGuard,
+    }) => {
       const { email, originalPassword, temporaryPassword, organization } = changePwdUser;
       const dashboardUrl = new RegExp(loginData.successUrlPattern);
 
@@ -19,7 +27,8 @@ test.describe('Login - change password', { tag: '@regression' }, () => {
       });
 
       await test.step('Change the password to the temporary one', async () => {
-        await changePasswordDialog.open();
+        await sidebar.openChangePassword();
+        await changePasswordDialog.expectOpen();
         // Unknown until the server answers: tells the fixture to check which password is active.
         passwordGuard.state = 'unknown';
         await changePasswordDialog.changePassword(originalPassword, temporaryPassword);
@@ -28,7 +37,7 @@ test.describe('Login - change password', { tag: '@regression' }, () => {
       });
 
       await test.step('Sign out', async () => {
-        await dashboardPage.signOut();
+        await sidebar.signOut(loginData.messages.signOutConfirm);
         await expect(loginPage.signInHeading).toBeVisible();
       });
 

@@ -18,6 +18,8 @@ test.describe('Login - SSO', { tag: '@smoke' }, () => {
       { tag: '@AT-LOGIN-002' },
       async ({ loginPage, loginData, page }) => {
         const { email } = loginData.validUser;
+        // The app's origin, read while on the sign-in page (works for any BASE_URL).
+        const appOrigin = new URL(page.url()).origin;
         expect(email, 'Set LOGIN_EMAIL in .env').toBeTruthy();
 
         const sso = await loginPage.interceptSsoRedirect(ssoData.providers.map((p) => p.idpHost));
@@ -33,7 +35,7 @@ test.describe('Login - SSO', { tag: '@smoke' }, () => {
 
         await test.step('Choose the provider and reach the IdP redirect', async () => {
           const ssoRequest = await loginPage.clickSsoProvider(provider.buttonLabel);
-          expect(new URL(ssoRequest.url()).origin).toBe(new URL(loginData.url).origin);
+          expect(new URL(ssoRequest.url()).origin).toBe(appOrigin);
 
           const idpUrl = await sso.redirect;
           expect(idpUrl.hostname).toBe(provider.idpHost);
@@ -42,7 +44,7 @@ test.describe('Login - SSO', { tag: '@smoke' }, () => {
           expect(idpUrl.searchParams.has('redirect_uri')).toBe(true);
           // The browser never requested the IdP, and stayed on the app.
           expect(sso.blockedIdpRequests).toHaveLength(0);
-          expect(new URL(page.url()).origin).toBe(new URL(loginData.url).origin);
+          expect(new URL(page.url()).origin).toBe(appOrigin);
         });
       },
     );
