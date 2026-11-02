@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import type { Locator, Page } from '@playwright/test';
 
 /**
@@ -16,11 +15,13 @@ const PAUSE_MS = 1000;
 export async function showCheck(locator: Locator) {
   if (!DEMO) return;
   await locator.highlight();
+  // eslint-disable-next-line playwright/no-wait-for-timeout -- demo mode only, see the note above
   await locator.page().waitForTimeout(PAUSE_MS);
 }
 
 /** Pause after a check that has no element to highlight (e.g. a URL check). */
 export async function showPause(page: Page) {
   if (!DEMO) return;
+  // eslint-disable-next-line playwright/no-wait-for-timeout -- demo mode only, see the note above
   await page.waitForTimeout(PAUSE_MS);
 }

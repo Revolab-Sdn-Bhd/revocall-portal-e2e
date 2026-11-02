@@ -21,10 +21,11 @@ export class AuditLogPage {
   /** The newest ListEvents call the UI made (URL, JSON body, protocol version). Used to re-ask the server without the UI. */
   private lastListCall?: ListCall;
 
-  constructor(page: Page) {
+  /** `heading` is the page title from test-data (audit-log.json). */
+  constructor(page: Page, heading: string) {
     this.page = page;
 
-    this.pageHeading = page.getByRole('heading', { level: 1, name: 'Audit Log', exact: true });
+    this.pageHeading = page.getByRole('heading', { level: 1, name: heading, exact: true });
     // The trigger shows "Any actor" until a value is chosen, then the chosen name.
     // The search box and the other filters have other names, so these are unique by their placeholder text.
     this.actorFilter = page.getByRole('button', { name: /^Any actor$/ });

@@ -8,9 +8,9 @@ name: Playwright Tests
 #   manual "Run workflow"         -> choose the suite (use "all" before a release)
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   schedule:
     # 18:00 UTC = 02:00 Asia/Kuala_Lumpur. Scheduled runs use the default branch (main).
     - cron: '0 18 * * *'
@@ -19,7 +19,7 @@ on:
       suite:
         description: 'Which tests to run'
         type: choice
-        options: [ all, smoke, regression ]
+        options: [all, smoke, regression]
         default: all
 
 # The tests share staging accounts (AT-LOGIN-004 changes a password), so never run two at once.
@@ -39,29 +39,36 @@ jobs:
       LOGIN_DISPLAY_NAME: ${{ secrets.LOGIN_DISPLAY_NAME }}
       CHANGE_PWD_EMAIL: ${{ secrets.CHANGE_PWD_EMAIL }}
       CHANGE_PWD_PASSWORD: ${{ secrets.CHANGE_PWD_PASSWORD }}
+      FAILED_LOGIN_EMAIL: ${{ secrets.FAILED_LOGIN_EMAIL }}
+      # Optional: leave the variable unset to test staging (the config default).
+      BASE_URL: ${{ vars.BASE_URL }}
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install dependencies
-      run: npm ci
-    - name: Install Playwright Browsers
-      # Only Chromium is enabled in playwright.config.ts.
-      run: npx playwright install --with-deps chromium
-    - name: Run Playwright tests
-      env:
-        SUITE: ${{ github.event_name == 'workflow_dispatch' && inputs.suite || ((github.event_name == 'pull_request' || github.ref == 'refs/heads/develop') && 'smoke' || 'all') }}
-      run: |
-        echo "Suite: $SUITE"
-        case "$SUITE" in
-          smoke)      npx playwright test --grep @smoke ;;
-          regression) npx playwright test --grep @regression ;;
-          *)          npx playwright test ;;
-        esac
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Type check
+        run: npm run typecheck
+      - name: Install Playwright Browsers
+        # Only Chromium is enabled in playwright.config.ts.
+        run: npx playwright install --with-deps chromium
+      - name: Run Playwright tests
+        env:
+          SUITE: ${{ github.event_name == 'workflow_dispatch' && inputs.suite || ((github.event_name == 'pull_request' || github.ref == 'refs/heads/develop') && 'smoke' || 'all') }}
+        run: |
+          echo "Suite: $SUITE"
+          case "$SUITE" in
+            smoke)      npm run test:smoke ;;
+            regression) npm run test:regression ;;
+            *)          npx playwright test ;;
+          esac
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
