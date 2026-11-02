@@ -1,7 +1,8 @@
-import { expect, type Locator, type Page } from '@playwright/test';
+import { expect, type Locator, type Page, type Response } from '@playwright/test';
 import { showCheck } from '../../utils/show-check';
 import { isAuditLogListCall } from '../../utils/api';
 
+type ListCall = { url: string; body: string; protocolVersion?: string };
 type AuditEvent = { occurredAt: string; verb: string; actorDisplayName: string };
 
 /**
@@ -16,6 +17,9 @@ export class AuditLogPage {
   readonly actorFilter: Locator;
   readonly actionFilter: Locator;
   readonly dataRows: Locator;
+
+  /** The newest ListEvents call the UI made (URL, JSON body, protocol version). Used to re-ask the server without the UI. */
+  private lastListCall?: ListCall;
 
   constructor(page: Page) {
     this.page = page;
@@ -34,7 +38,7 @@ export class AuditLogPage {
     await trigger.click();
     const reloaded = this.page.waitForResponse(isAuditLogListCall);
     await this.page.getByRole('menuitemcheckbox', { name: value, exact: true }).click();
-    await reloaded;
+    this.lastListCall = this.describeListCall(await reloaded);
     // Closes the menu; the filter stays applied.
     await this.page.keyboard.press('Escape');
   }
@@ -49,17 +53,43 @@ export class AuditLogPage {
     await expect(this.page.getByRole('button', { name: filterLabel, exact: true })).toBeVisible();
   }
 
+  private describeListCall(response: Response): ListCall {
+    const request = response.request();
+    const body = request.postData();
+    expect(body, 'the Audit Log list call has a JSON body').toBeTruthy();
+    return {
+      url: request.url(),
+      body: body!,
+      protocolVersion: request.headers()['connect-protocol-version'],
+    };
+  }
+
   /**
-   * Reloads the page (filters stay in the URL) and returns the newest time, in ms, among the events
-   * the server returned for the current filters, or 0 when there are none.
+   * Asks the server directly (same request the filtered list made, same session cookies, no page
+   * involved) and returns the newest time, in ms, of the events with this verb, or 0 when there are none.
    * Built for expect.poll: the audit entry is written by the server a moment after the action.
+   * Needs filterByActor / filterByAction to have run first, so the body carries both filters.
    */
-  async reloadAndGetLatestEventTime(verb: string): Promise<number> {
-    const listResponse = this.page.waitForResponse(isAuditLogListCall);
-    await this.page.reload();
-    const { events = [] } = (await (await listResponse).json()) as { events?: AuditEvent[] };
+  async getLatestEventTime(verb: string): Promise<number> {
+    const call = this.lastListCall;
+    expect(call, 'filter the list first so the list request can be reused').toBeDefined();
+    const response = await this.page.request.post(call!.url, {
+      data: call!.body,
+      headers: {
+        'content-type': 'application/json',
+        ...(call!.protocolVersion ? { 'connect-protocol-version': call!.protocolVersion } : {}),
+      },
+    });
+    expect(response.ok(), 'Audit Log list call status').toBe(true);
+    const { events = [] } = (await response.json()) as { events?: AuditEvent[] };
     const times = events.filter((e) => e.verb === verb).map((e) => Date.parse(e.occurredAt));
     return times.length ? Math.max(...times) : 0;
+  }
+
+  /** Reloads once (the filters stay in the URL). Callers then wait on the rows, not on a response. */
+  async reload() {
+    await this.page.reload();
+    await this.expectLoaded();
   }
 
   async expectLoaded() {

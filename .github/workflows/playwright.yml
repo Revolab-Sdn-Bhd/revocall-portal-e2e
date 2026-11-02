@@ -1,11 +1,26 @@
 name: Playwright Tests
+
+# Standard CI-01: @smoke on every pull request, full suite nightly and before each release.
+#   pull request to main/develop  -> @smoke
+#   push to develop (after merge) -> @smoke
+#   push to main (after merge)    -> full suite
+#   nightly (02:00 MYT)           -> full suite
+#   manual "Run workflow"         -> choose the suite (use "all" before a release)
 on:
   push:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
-  # Lets you start a run by hand from the Actions tab.
+  schedule:
+    # 18:00 UTC = 02:00 Asia/Kuala_Lumpur. Scheduled runs use the default branch (main).
+    - cron: '0 18 * * *'
   workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Which tests to run'
+        type: choice
+        options: [ all, smoke, regression ]
+        default: all
 
 # The tests share staging accounts (AT-LOGIN-004 changes a password), so never run two at once.
 concurrency:
@@ -35,7 +50,15 @@ jobs:
       # Only Chromium is enabled in playwright.config.ts.
       run: npx playwright install --with-deps chromium
     - name: Run Playwright tests
-      run: npx playwright test
+      env:
+        SUITE: ${{ github.event_name == 'workflow_dispatch' && inputs.suite || ((github.event_name == 'pull_request' || github.ref == 'refs/heads/develop') && 'smoke' || 'all') }}
+      run: |
+        echo "Suite: $SUITE"
+        case "$SUITE" in
+          smoke)      npx playwright test --grep @smoke ;;
+          regression) npx playwright test --grep @regression ;;
+          *)          npx playwright test ;;
+        esac
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:

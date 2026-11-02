@@ -41,15 +41,18 @@ test.describe('Audit Log - sign-in events', { tag: '@regression' }, () => {
     });
 
     await test.step('Verify a new sign-in entry exists', async () => {
-      // Polls because the entry is written by the server shortly after the sign-in.
+      // Polls the API (same filtered request the UI made) because the entry is written by the server
+      // shortly after the sign-in. No page reload, so no response can belong to a replaced page.
       await expect
-        .poll(() => auditLogPage.reloadAndGetLatestEventTime(auditLogData.signIn.verb), {
+        .poll(() => auditLogPage.getLatestEventTime(auditLogData.signIn.verb), {
           message: 'a sign-in event for this user newer than the sign-in start time',
           timeout: auditLogData.pollTimeoutMs,
           intervals: [500, 1_000, 2_000, 3_000],
         })
         .toBeGreaterThanOrEqual(signInStartedAt);
 
+      // One reload to see the entry in the UI; the rows are web-first assertions, no response is read.
+      await auditLogPage.reload();
       await auditLogPage.expectLatestRow({
         actor: displayName!,
         event: auditLogData.signIn.eventLabel,

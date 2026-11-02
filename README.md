@@ -74,9 +74,20 @@ Flow: `feature/...` → pull request into `develop` → pull request into `main`
 
 ## CI
 
-GitHub Actions (`.github/workflows/playwright.yml`) runs the suite on pushes and pull requests to
-`main` and `develop`, and can be started by hand from the Actions tab. Only one run happens at a time,
-because the tests share staging accounts. The HTML report is uploaded as a build artifact.
+GitHub Actions (`.github/workflows/playwright.yml`) follows standard CI-01:
+
+| Trigger | Runs |
+|---|---|
+| Pull request to `main` / `develop` | `@smoke` |
+| Push to `develop` (after merge) | `@smoke` |
+| Push to `main` (after merge) | Full suite |
+| Nightly, 02:00 MYT | Full suite |
+| Actions tab → Run workflow | Choose `all`, `smoke` or `regression` (run `all` before each release) |
+
+Only one run happens at a time, because the tests share staging accounts. The HTML report is
+uploaded as a build artifact.
+
+The team standards are in `docs/Playwright_Automation_Standards_v1.0.xlsx`.
 
 Add these repository secrets under Settings → Secrets and variables → Actions:
 `LOGIN_EMAIL`, `LOGIN_PASSWORD`, `LOGIN_ORGANIZATION`, `LOGIN_DISPLAY_NAME`,
