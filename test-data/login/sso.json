@@ -1,0 +1,15 @@
+{
+  "headingName": "Choose sign-in method",
+  "providers": [
+    {
+      "name": "Google Oauth",
+      "buttonLabel": "Sign in with Google Oauth",
+      "idpHost": "accounts.google.com"
+    },
+    {
+      "name": "Microsoft Entra",
+      "buttonLabel": "Sign in with Microsoft Entra",
+      "idpHost": "login.microsoftonline.com"
+    }
+  ]
+}

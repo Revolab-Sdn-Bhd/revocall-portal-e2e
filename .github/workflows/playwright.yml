@@ -1,0 +1,44 @@
+name: Playwright Tests
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  # Lets you start a run by hand from the Actions tab.
+  workflow_dispatch:
+
+# The tests share staging accounts (AT-LOGIN-004 changes a password), so never run two at once.
+concurrency:
+  group: staging-e2e
+  cancel-in-progress: false
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    env:
+      # Staging accounts come from repo Settings > Secrets and variables > Actions.
+      LOGIN_EMAIL: ${{ secrets.LOGIN_EMAIL }}
+      LOGIN_PASSWORD: ${{ secrets.LOGIN_PASSWORD }}
+      LOGIN_ORGANIZATION: ${{ secrets.LOGIN_ORGANIZATION }}
+      LOGIN_DISPLAY_NAME: ${{ secrets.LOGIN_DISPLAY_NAME }}
+      CHANGE_PWD_EMAIL: ${{ secrets.CHANGE_PWD_EMAIL }}
+      CHANGE_PWD_PASSWORD: ${{ secrets.CHANGE_PWD_PASSWORD }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: lts/*
+    - name: Install dependencies
+      run: npm ci
+    - name: Install Playwright Browsers
+      # Only Chromium is enabled in playwright.config.ts.
+      run: npx playwright install --with-deps chromium
+    - name: Run Playwright tests
+      run: npx playwright test
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30

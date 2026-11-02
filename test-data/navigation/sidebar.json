@@ -1,0 +1,20 @@
+{
+  "_note": "Set enabled to false for menu items your test account cannot see (feature flags / permissions). Enabled items that are missing from the menu FAIL, so a vanished page is caught.",
+  "items": [
+    { "label": "Overview", "path": "/dashboard", "heading": "Overview", "enabled": true, "exact": true, "startFrom": "/dashboard/journeys" },
+    { "label": "Batches", "path": "/dashboard/batches", "heading": "Batches", "enabled": true },
+    { "label": "Conversation Logs", "path": "/dashboard/conversation-logs", "heading": "Conversation Logs", "enabled": true },
+    { "label": "Callback Inbox", "path": "/dashboard/callback-inbox", "heading": "Callback Inbox", "enabled": true },
+    { "label": "Journeys", "path": "/dashboard/journeys", "heading": "Journeys", "enabled": true },
+    { "label": "Workforce", "path": "/dashboard/workforce", "heading": "Workforce", "enabled": true },
+    { "label": "Capabilities", "path": "/dashboard/capabilities", "heading": "Capabilities", "enabled": true },
+    { "label": "Integrations", "path": "/dashboard/integration", "heading": "Integrations", "enabled": true },
+    { "label": "Pre-Conversation Work", "path": "/dashboard/pre-conversation-work", "heading": "Pre-Conversation Work", "enabled": true },
+    { "label": "After-Call Work", "path": "/dashboard/after-call-work", "heading": "After-Call Work", "enabled": true },
+    { "label": "Analytics", "path": "/dashboard/analytics", "heading": "Analytics", "enabled": true },
+    { "label": "Dynamic Analytics", "path": "/dashboard/dynamic-analytics", "heading": "Dynamic Analytics", "enabled": true },
+    { "label": "Quality Assurance (QA)", "path": "/dashboard/quality_assurance", "heading": "Quality Assurance", "enabled": true },
+    { "label": "Organization", "path": "/dashboard/organization", "heading": "Organization", "enabled": true },
+    { "label": "Access Control", "path": "/dashboard/access-control", "heading": "Access Control", "enabled": true }
+  ]
+}

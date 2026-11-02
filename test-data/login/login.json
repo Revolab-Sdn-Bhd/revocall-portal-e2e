@@ -1,0 +1,19 @@
+{
+  "url": "https://admin.stg.revocall-staging.com/auth/sign-in",
+  "successUrlPattern": "/dashboard",
+  "validUser": {
+    "email": "",
+    "password": "",
+    "organization": "",
+    "displayName": ""
+  },
+  "unknownUser": {
+    "email": "qa.unknown.user@example.com",
+    "password": "NotARealPass#123"
+  },
+  "wrongPassword": "WrongPassword#123",
+  "invalidEmailFormat": "not-an-email",
+  "messages": {
+    "invalidCredentials": "Incorrect email or password."
+  }
+}

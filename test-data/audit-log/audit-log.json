@@ -1,0 +1,15 @@
+{
+  "page": {
+    "label": "Audit Log",
+    "path": "/dashboard/audit-log",
+    "heading": "Audit Log",
+    "enabled": true
+  },
+  "signIn": {
+    "filterLabel": "Sign-in succeeded",
+    "eventLabel": "Signed in",
+    "resultLabel": "Success",
+    "verb": "signed_in"
+  },
+  "pollTimeoutMs": 30000
+}
