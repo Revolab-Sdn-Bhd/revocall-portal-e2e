@@ -1,13 +1,11 @@
-/// <reference types="node" />
-// The project has no tsconfig.json, so VS Code does not load Node types by default.
-// This line enables them for fs, path, __dirname and process.env.
 import { test as base, expect } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 import { LoginPage } from '../pages/login/LoginPage';
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
+import { SidebarComponent } from '../pages/components/SidebarComponent';
 import { AuditLogPage } from '../pages/audit-log/AuditLogPage';
-import type { SidebarItem } from '../pages/dashboard/DashboardPage';
+import type { SidebarItem } from '../pages/components/SidebarComponent';
 
 /** Where the logged-in session is saved by tests/setup/auth.setup.ts (git-ignored). */
 export const AUTH_FILE = path.resolve(__dirname, '../playwright/.auth/user.json');
@@ -22,13 +20,17 @@ export type LoginUser = {
 
 export type LoginData = {
   url: string;
+  signInUrlPattern: string;
   successUrlPattern: string;
   validUser: LoginUser;
+  /* Email only: the dedicated account for the failed-login test (no password needed). */
+  failedLoginEmail: string;
   unknownUser: LoginUser;
   wrongPassword: string;
   invalidEmailFormat: string;
   messages: {
     invalidCredentials: string;
+    signOutConfirm: string;
   };
 };
 
@@ -47,6 +49,7 @@ export function readTestData<T>(relativePath: string): T {
 /**
  * Loads login test data. Credentials come from .env (LOGIN_EMAIL, LOGIN_PASSWORD,
  * LOGIN_ORGANIZATION, LOGIN_DISPLAY_NAME) and override the values in login.json.
+ * FAILED_LOGIN_EMAIL is the dedicated account for the wrong-password test (DATA-03).
  */
 function loadLoginData(): LoginData {
   const data = readTestData<LoginData>('login/login.json');
@@ -57,6 +60,8 @@ function loadLoginData(): LoginData {
     organization: process.env.LOGIN_ORGANIZATION || data.validUser.organization,
     displayName: process.env.LOGIN_DISPLAY_NAME || data.validUser.displayName,
   };
+
+  data.failedLoginEmail = process.env.FAILED_LOGIN_EMAIL || data.failedLoginEmail;
 
   return data;
 }
@@ -70,9 +75,19 @@ export function requireCredentials(user: LoginUser) {
   }
 }
 
+/** Stops the wrong-password test with a clear message when its dedicated account is not configured. */
+export function requireFailedLoginEmail(email: string) {
+  if (!email) {
+    throw new Error(
+      'Missing account: set FAILED_LOGIN_EMAIL in .env (see .env.example). It must be a dedicated account, not LOGIN_EMAIL.',
+    );
+  }
+}
+
 type BaseFixtures = {
   loginData: LoginData;
   loginPage: LoginPage;
+  sidebar: SidebarComponent;
   dashboardPage: DashboardPage;
   auditLogData: AuditLogData;
   auditLogPage: AuditLogPage;
@@ -91,16 +106,20 @@ export const test = base.extend<BaseFixtures>({
     await use(new LoginPage(page, loginData.url));
   },
 
-  dashboardPage: async ({ page, loginData }, use) => {
-    await use(new DashboardPage(page, new URL(loginData.url).origin));
+  sidebar: async ({ page }, use) => {
+    await use(new SidebarComponent(page));
+  },
+
+  dashboardPage: async ({ page, sidebar }, use) => {
+    await use(new DashboardPage(page, sidebar));
   },
 
   auditLogData: async ({}, use) => {
     await use(readTestData<AuditLogData>('audit-log/audit-log.json'));
   },
 
-  auditLogPage: async ({ page }, use) => {
-    await use(new AuditLogPage(page));
+  auditLogPage: async ({ page, auditLogData }, use) => {
+    await use(new AuditLogPage(page, auditLogData.page.heading));
   },
 });
 

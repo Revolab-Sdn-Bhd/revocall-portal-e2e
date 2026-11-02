@@ -16,5 +16,5 @@ export const test = base.extend({
   },
 });
 
-export { expect, requireCredentials } from './base.fixture';
+export { expect, requireCredentials, requireFailedLoginEmail } from './base.fixture';
 export type { LoginData, LoginUser } from './base.fixture';

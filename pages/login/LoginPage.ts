@@ -1,6 +1,10 @@
 import { expect, type Locator, type Page, type Request, type Response } from '@playwright/test';
 import { showCheck } from '../../utils/show-check';
 import { isLoginCall, isDiscoverCall, isSsoLoginCall } from '../../utils/api';
+import { SidebarComponent } from '../components/SidebarComponent';
+
+// Longest redirect chain followed when the SSO login call is intercepted.
+const MAX_SSO_HOPS = 5;
 
 /**
  * Page Object for the RevoCall Admin sign-in flow.
@@ -12,6 +16,7 @@ import { isLoginCall, isDiscoverCall, isSsoLoginCall } from '../../utils/api';
  */
 export class LoginPage {
   readonly page: Page;
+  /** Sign-in path, relative to baseURL. */
   readonly url: string;
 
   /* Step 1 - email */
@@ -32,8 +37,8 @@ export class LoginPage {
   /* SSO provider choice (shown on the password step when SSO is set up) */
   readonly ssoHeading: Locator;
 
-  /* Only exists once signed in (dashboard sidebar). Used to know that sign-in finished. */
-  readonly signedInIndicator: Locator;
+  /* Only exists once signed in (the sign out button). Used to know that sign-in finished. */
+  readonly sidebar: SidebarComponent;
 
   constructor(page: Page, url: string) {
     this.page = page;
@@ -55,7 +60,7 @@ export class LoginPage {
 
     this.ssoHeading = page.getByRole('heading', { name: 'Choose sign-in method' });
 
-    this.signedInIndicator = page.getByRole('button', { name: 'Sign out' });
+    this.sidebar = new SidebarComponent(page);
   }
 
   async goto() {
@@ -93,7 +98,7 @@ export class LoginPage {
    * organizations, the organization chooser. Waits for whichever appears and handles it.
    */
   async finishSignIn(organization?: string) {
-    await expect(this.signedInIndicator.or(this.organizationHeading)).toBeVisible();
+    await expect(this.sidebar.signOutButton.or(this.organizationHeading)).toBeVisible();
 
     // Safe to check without waiting: one of the two is already visible at this point.
     if (await this.organizationHeading.isVisible()) {
@@ -106,14 +111,18 @@ export class LoginPage {
     }
   }
 
+  organizationButton(name: string): Locator {
+    return this.page.getByRole('button', { name, exact: true });
+  }
+
   async selectOrganization(name: string) {
     await expect(this.organizationHeading).toBeVisible();
 
     const loginResponse = this.page.waitForResponse(isLoginCall);
-    await this.page.getByRole('button', { name, exact: true }).click();
+    await this.organizationButton(name).click();
     await loginResponse;
 
-    await expect(this.signedInIndicator).toBeVisible();
+    await expect(this.sidebar.signOutButton).toBeVisible();
   }
 
   /** Full login: email -> password -> (organization) -> signed in. */
@@ -163,7 +172,8 @@ export class LoginPage {
   async interceptSsoRedirect(idpHosts: string[]) {
     const context = this.page.context();
     const blockedIdpRequests: string[] = [];
-    const maxHops = 5;
+    // The app's own host, read while the browser is on the sign-in page.
+    const appHostname = new URL(this.page.url()).hostname;
 
     await context.route(
       (url) => idpHosts.includes(url.hostname),
@@ -182,13 +192,16 @@ export class LoginPage {
     redirect.catch(() => {}); // reported by whoever awaits it
 
     await context.route(
-      (url) => url.hostname === new URL(this.url).hostname && isSsoLoginCall({ url: () => url.href } as Request),
+      (url) => url.hostname === appHostname && isSsoLoginCall({ url: () => url.href } as Request),
       async (route) => {
         try {
           let response = await route.fetch({ maxRedirects: 0 });
-          for (let hop = 0; hop < maxHops; hop++) {
+          for (let hop = 0; hop < MAX_SSO_HOPS; hop++) {
             const location = response.headers()['location'];
-            if (!location) throw new Error(`SSO redirect chain ended without reaching an IdP (status ${response.status()})`);
+            if (!location)
+              throw new Error(
+                `SSO redirect chain ended without reaching an IdP (status ${response.status()})`,
+              );
             const next = new URL(location, response.url());
             if (idpHosts.includes(next.hostname)) {
               resolveRedirect(next);
@@ -219,11 +232,16 @@ export class LoginPage {
   }
 
   /** Browser (HTML5) validation state of the email field. */
-  async getEmailValidity() {
+  private async getEmailValidity() {
     return this.emailInput.evaluate((input: HTMLInputElement) => ({
       valueMissing: input.validity.valueMissing,
       typeMismatch: input.validity.typeMismatch,
     }));
+  }
+
+  /** Checks the browser blocked the email as empty (valueMissing) or badly formatted (typeMismatch). */
+  async expectEmailInvalid(kind: 'valueMissing' | 'typeMismatch') {
+    await expect.poll(async () => (await this.getEmailValidity())[kind]).toBe(true);
   }
 
   async expectOnEmailStep() {
@@ -234,18 +252,26 @@ export class LoginPage {
     await expect(this.passwordInput).toBeHidden();
   }
 
+  emailChip(email: string): Locator {
+    return this.page.getByText(email, { exact: true });
+  }
+
+  errorMessage(message: string): Locator {
+    return this.page.getByText(message, { exact: true });
+  }
+
   async expectOnPasswordStep(email: string) {
     await expect(this.passwordStepHeading).toBeVisible();
     await showCheck(this.passwordStepHeading);
     await expect(this.passwordInput).toBeVisible();
     // The chosen email is shown as a chip above the password field.
-    const emailChip = this.page.getByText(email, { exact: true });
+    const emailChip = this.emailChip(email);
     await expect(emailChip).toBeVisible();
     await showCheck(emailChip);
   }
 
   async expectErrorMessage(message: string) {
-    const error = this.page.getByText(message, { exact: true });
+    const error = this.errorMessage(message);
     await expect(error).toBeVisible();
     await showCheck(error);
   }

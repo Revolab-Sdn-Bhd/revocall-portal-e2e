@@ -1,5 +1,5 @@
 import { test, readTestData } from '../../fixtures/base.fixture';
-import type { SidebarItem } from '../../pages/dashboard/DashboardPage';
+import type { SidebarItem } from '../../pages/components/SidebarComponent';
 
 const { items } = readTestData<{ items: SidebarItem[] }>('navigation/sidebar.json');
 
@@ -11,23 +11,27 @@ const { items } = readTestData<{ items: SidebarItem[] }>('navigation/sidebar.jso
  * Whether an item is expected is decided in test-data (enabled: true/false), not by
  * looking at the screen. An enabled item that is missing from the menu fails the test.
  */
-test.describe('Sidebar navigation', { tag: '@smoke' }, () => {
+test.describe('Navigation - sidebar', { tag: '@smoke' }, () => {
   for (const item of items) {
-    test(`should open ${item.label}`, async ({ dashboardPage }) => {
-      test.skip(!item.enabled, `"${item.label}" is disabled for this account in sidebar.json`);
+    test(
+      `should open ${item.label}`,
+      { tag: `@${item.id}` },
+      async ({ dashboardPage, sidebar }) => {
+        test.skip(!item.enabled, `"${item.label}" is disabled for this account in sidebar.json`);
 
-      await test.step('Open start page', async () => {
-        await dashboardPage.goto(item.startFrom ?? '/dashboard');
-        await dashboardPage.expectLoaded();
-      });
+        await test.step('Open start page', async () => {
+          await dashboardPage.goto(item.startFrom ?? '/dashboard');
+          await dashboardPage.expectLoaded();
+        });
 
-      await test.step(`Click "${item.label}" in the sidebar`, async () => {
-        await dashboardPage.openFromSidebar(item);
-      });
+        await test.step(`Click "${item.label}" in the sidebar`, async () => {
+          await sidebar.openFromSidebar(item);
+        });
 
-      await test.step(`Verify "${item.heading}" page is shown`, async () => {
-        await dashboardPage.expectPageLoaded(item);
-      });
-    });
+        await test.step(`Verify "${item.heading}" page is shown`, async () => {
+          await sidebar.expectPageLoaded(item);
+        });
+      },
+    );
   }
 });
