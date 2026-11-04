@@ -5,6 +5,7 @@ import { LoginPage } from '../pages/login/LoginPage';
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { SidebarComponent } from '../pages/components/SidebarComponent';
 import { AuditLogPage } from '../pages/audit-log/AuditLogPage';
+import { ConversationLogsPage } from '../pages/conversation-logs/ConversationLogsPage';
 import type { SidebarItem } from '../pages/components/SidebarComponent';
 
 /** Where the logged-in session is saved by tests/setup/auth.setup.ts (git-ignored). */
@@ -38,6 +39,119 @@ export type AuditLogData = {
   page: SidebarItem;
   signIn: { filterLabel: string; eventLabel: string; resultLabel: string; verb: string };
   pollTimeoutMs: number;
+};
+
+export type ConversationLogsData = {
+  page: SidebarItem;
+  columns: { call: string[]; chat: string[] };
+  formats: {
+    dateTimePattern: string;
+    durationPattern: string;
+    numberPattern: string;
+    conversationIdPattern: string;
+  };
+  outcomeValues: { call: string[]; chat: string[] };
+  filters: {
+    journey: string;
+    disposition: string;
+    outcome: string;
+    secondOutcome: string;
+    chatWidget: string;
+    chatJourney: string;
+    secondChatJourney: string;
+    secondChatWidget: string;
+    noRowsDisposition: string;
+    noResponseDisposition: string;
+    escalatedOutcome: string;
+    droppedOutcome: string;
+    callbackItem: string;
+    notCallbackItem: string;
+  };
+  pageSize: { call: number; chat: number };
+  filterOptions: {
+    callOutcomes: string[];
+    chatOutcomes: string[];
+    dispositions: string[];
+    dispositionsChecked: string[];
+    chatWidgets: string[];
+    prdCallOutcomes: string[];
+  };
+  requestValues: {
+    outcome: Record<string, string>;
+    disposition: Record<string, string>;
+  };
+  chipVariants: Record<string, string>;
+  messages: {
+    emptyCall: string;
+    emptyChat: string;
+    emptyHint: string;
+    callbackTag: string;
+    testCallContact: string;
+    placeholder: string;
+    searchPlaceholderCall: string;
+    searchPlaceholderChat: string;
+  };
+  search: {
+    journeyTerm: string;
+    journeyTermCased: string;
+    paddedTerm: string;
+    noMatch: string;
+    manyResults: string;
+    chatWidgetTerm: string;
+    scriptTerm: string;
+    sqlTerm: string;
+    idPrefixLength: number;
+  };
+  urlParams: {
+    disposition: string;
+    twoDispositions: string;
+    unknownTab: string;
+    unknownDisposition: string;
+  };
+  viewport: { width: number; height: number };
+  access: {
+    callListPath: string;
+    callListMessage: Record<string, unknown>;
+    callExportCountPath: string;
+    chatExportPath: string;
+    exportRangeDaysAgo: number;
+    exportTimezone: string;
+    unauthenticatedCode: string;
+    /* Signed-in user and active organisation (Connect RPC, GET, cookie session). */
+    profilePath: string;
+    /* Details requests of one conversation (message: { callLogId }); they carry no organisation. */
+    callSummaryPath: string;
+    callToolCallsPath: string;
+    permissionDeniedCode: string;
+    /* Where the app sends a signed-in user who opens a page the role has no permission for. */
+    noAccessHomePattern: string;
+    homeSidebarLabel: string;
+  };
+  sorting: { call: string[]; callNotSortable: string[]; chat: string[] };
+  detailsTabs: {
+    call: string[];
+    chat: string[];
+    noExtraction: string;
+    stillProcessing: string;
+    noRating: string;
+    sentimentLabels: string[];
+    audioLabel: string;
+    downloadLink: string;
+    noCredits: string;
+  };
+  details: {
+    call: { dialogName: string; tabs: string[] };
+    chat: { dialogName: string; tabs: string[] };
+  };
+  export: {
+    dialogName: string;
+    callHeading: string;
+    callFilenamePattern: string;
+    chatFilenamePattern: string;
+    chatNote: string;
+    chatFromDaysAgo: number;
+    downloadTimeoutMs: number;
+  };
 };
 
 /** Reads a JSON file from the test-data folder, e.g. readTestData('login/login.json'). */
@@ -91,6 +205,8 @@ type BaseFixtures = {
   dashboardPage: DashboardPage;
   auditLogData: AuditLogData;
   auditLogPage: AuditLogPage;
+  conversationLogsData: ConversationLogsData;
+  conversationLogsPage: ConversationLogsPage;
 };
 
 /**
@@ -120,6 +236,24 @@ export const test = base.extend<BaseFixtures>({
 
   auditLogPage: async ({ page, auditLogData }, use) => {
     await use(new AuditLogPage(page, auditLogData.page.heading));
+  },
+
+  conversationLogsData: async ({}, use) => {
+    await use(readTestData<ConversationLogsData>('conversation-logs/conversation-logs.json'));
+  },
+
+  conversationLogsPage: async ({ page, conversationLogsData }, use) => {
+    const { page: item, details, export: exportData } = conversationLogsData;
+    await use(
+      new ConversationLogsPage(page, {
+        path: item.path,
+        heading: item.heading,
+        callDetailsName: details.call.dialogName,
+        chatDetailsName: details.chat.dialogName,
+        exportDialogName: exportData.dialogName,
+        exportCallsHeading: exportData.callHeading,
+      }),
+    );
   },
 });
 

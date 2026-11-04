@@ -22,9 +22,12 @@
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.63.0",
     "@types/node": "^26.6.3",
+    "csv-parse": "^7.0.3",
     "eslint": "^10.14.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-playwright": "^2.12.1",
+    "exceljs": "^4.4.0",
+    "jszip": "^3.10.2",
     "prettier": "^3.9.10",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.1"

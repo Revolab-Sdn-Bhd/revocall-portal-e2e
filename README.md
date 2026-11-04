@@ -13,14 +13,16 @@ cp .env.example .env
 
 Fill in `.env` with the staging test accounts. It is git-ignored: never commit it.
 
-| Variable                                  | Used for                                                                                                                                                   |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LOGIN_EMAIL`, `LOGIN_PASSWORD`           | Main account, used by every test except change password                                                                                                    |
-| `LOGIN_ORGANIZATION`                      | Organization picked after sign-in (`Revolab QA`)                                                                                                           |
-| `LOGIN_DISPLAY_NAME`                      | Name shown in the sidebar and Audit Log (needed by AT-LOGIN-006)                                                                                           |
-| `CHANGE_PWD_EMAIL`, `CHANGE_PWD_PASSWORD` | Dedicated account, only for AT-LOGIN-004. Must be its original password                                                                                    |
-| `FAILED_LOGIN_EMAIL`                      | Dedicated account (email only) for the wrong-password test AT-LOGIN-010. Never the main account. The test fails fast with a clear message when it is empty |
-| `BASE_URL`                                | Optional. Environment to test, defaults to staging                                                                                                         |
+| Variable                                                          | Used for                                                                                                                                                     |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `LOGIN_EMAIL`, `LOGIN_PASSWORD`                                   | Main account, used by every test except change password                                                                                                      |
+| `LOGIN_ORGANIZATION`                                              | Organization picked after sign-in (`Revolab QA`)                                                                                                             |
+| `LOGIN_DISPLAY_NAME`                                              | Name shown in the sidebar and Audit Log (needed by AT-LOGIN-006)                                                                                             |
+| `CHANGE_PWD_EMAIL`, `CHANGE_PWD_PASSWORD`                         | Dedicated account, only for AT-LOGIN-004. Must be its original password                                                                                      |
+| `FAILED_LOGIN_EMAIL`                                              | Dedicated account (email only) for the wrong-password test AT-LOGIN-010. Never the main account. The test fails fast with a clear message when it is empty   |
+| `NO_ACCESS_EMAIL`, `NO_ACCESS_PASSWORD`, `NO_ACCESS_ORGANIZATION` | Optional. Account whose role has no Conversation Logs access, for AT-CLOG-106 (skipped while empty). Organization is only needed if the sign-in asks for one |
+| `OTHER_ORG_EMAIL`, `OTHER_ORG_PASSWORD`, `OTHER_ORG_ORGANIZATION` | Optional. Org Admin of another organization, for AT-CLOG-107 (skipped while empty)                                                                           |
+| `BASE_URL`                                                        | Optional. Environment to test, defaults to staging                                                                                                           |
 
 ## Running tests
 
