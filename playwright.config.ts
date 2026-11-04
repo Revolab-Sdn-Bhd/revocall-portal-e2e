@@ -26,6 +26,9 @@ export default defineConfig({
     // BASE_URL may be set but empty in CI when the variable is not defined, hence || and not ??.
     baseURL: process.env.BASE_URL || STAGING_URL,
 
+    // Users are in Malaysia, and exports label times in the browser's time zone. CI runners are UTC.
+    timezoneId: 'Asia/Kuala_Lumpur',
+
     // CFG-01: keep evidence of failures.
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',

@@ -1,0 +1,175 @@
+{
+  "_note": "Data for the Conversation Logs export specs. Staging data is live, so ranges are computed at run time from the newest conversation; only journeys and labels are fixed here.",
+  "dialogName": "Export Conversation Logs",
+  "callHeading": "Calls",
+  "downloadTimeoutMs": 120000,
+  "timeZone": "Asia/Kuala_Lumpur",
+  "defaultRangeDays": 30,
+  "wideFrom": "2025-01-01",
+  "journeys": {
+    "call": "UMobile latest",
+    "chat": "QA Voice Journey R"
+  },
+  "filenames": {
+    "callExcel": "^conversation_log_\\d{8}_to_\\d{8}\\.xlsx$",
+    "callZip": "^conversation_log_\\d{8}_to_\\d{8}\\.zip$",
+    "callPrefix": "conversation_log_",
+    "chatPrefix": "chat-logs-"
+  },
+  "call": {
+    "filtersNone": "None",
+    "alwaysIncluded": "Always included",
+    "zipHint": "A .zip with one CSV per sheet",
+    "excelHint": "One file, a sheet per section",
+    "nothingToExport": "Nothing to export",
+    "rangeError": "The start date must be on or before the end date.",
+    "sections": ["Summary", "Sentiment", "Rating", "Insights", "Transcript", "Callbacks"],
+    "sectionParams": {
+      "Summary": "summary",
+      "Sentiment": "sentiment",
+      "Rating": "rating",
+      "Insights": "insights",
+      "Transcript": "transcript",
+      "Callbacks": "callbacks"
+    },
+    "excelSheets": ["About this export", "Conversations", "Insights", "Transcript", "Callbacks"],
+    "excelSheetsHint": "Sheets: About, Conversations, Insights, Transcript, Callbacks",
+    "csvEntries": ["conversations.csv", "insights.csv", "transcript.csv", "callbacks.csv"],
+    "columns": [
+      "Conversation ID",
+      "Started at (GMT+8)",
+      "Journey",
+      "Direction",
+      "Contact number",
+      "Duration (s)",
+      "Call disposition",
+      "Agent outcome",
+      "Credits used",
+      "Off-hours escalation",
+      "Batch ID",
+      "Callback call",
+      "Original conversation ID",
+      "Test call",
+      "Summary",
+      "Outcome explanation",
+      "Sentiment",
+      "Sentiment reason",
+      "Rating (1–5)",
+      "Rating status",
+      "Link"
+    ],
+    "summaryColumns": ["Summary", "Outcome explanation"],
+    "sentimentColumns": ["Sentiment", "Sentiment reason"],
+    "ratingColumns": ["Rating (1–5)", "Rating status"],
+    "transcriptColumns": ["Conversation ID", "Speaker", "Message", "Caller emotion"],
+    "keyColumn": "Conversation ID",
+    "callbackKeyColumn": "Original conversation ID",
+    "callbacksColumns": [
+      "Original conversation ID",
+      "Source",
+      "Method",
+      "Status",
+      "Closed outcome",
+      "Reason",
+      "Trigger",
+      "Created at (Asia/Kuala_Lumpur)",
+      "Closed at (Asia/Kuala_Lumpur)",
+      "Dismissed at (Asia/Kuala_Lumpur)",
+      "Dismiss reason",
+      "Last attempt error",
+      "Callback journey",
+      "Callback conversation IDs"
+    ],
+    "startedAtColumn": "Started at (GMT+8)",
+    "aboutSheet": "About this export",
+    "about": {
+      "labels": [
+        "Organization",
+        "Channel",
+        "Journey",
+        "Date range",
+        "Timezone",
+        "Filters applied",
+        "Test calls",
+        "Sections included",
+        "Exported by",
+        "Exported on"
+      ],
+      "channel": "Call",
+      "timezone": "GMT+8 (Asia/Kuala_Lumpur)",
+      "noFilters": "No filters",
+      "testCallsOff": "Not included",
+      "rowsPerSheet": "Rows per sheet",
+      "glossary": "Conversations columns"
+    },
+    "listColumns": {
+      "contact": "Contact number",
+      "journey": "Journey name",
+      "dateTime": "Date & time",
+      "duration": "Duration",
+      "disposition": "Call disposition",
+      "outcome": "Agent outcome"
+    },
+    "noOutcomeInList": "—",
+    "filters": {
+      "outcome": "Resolved",
+      "outcomeSummary": "Agent outcome: Resolved",
+      "outcomeParam": "resolved",
+      "disposition": "Success",
+      "dispositionSummary": "Disposition: Success",
+      "dispositionParam": "success"
+    },
+    "ranges": [
+      {
+        "from": "2026-11-03",
+        "to": "2026-11-03",
+        "label": "Nov 3, 2026",
+        "filenamePart": "03112026_to_03112026"
+      },
+      {
+        "from": "2026-10-27",
+        "to": "2026-11-02",
+        "label": "Oct 27 – Nov 2, 2026",
+        "filenamePart": "27102026_to_02112026"
+      },
+      {
+        "from": "2025-01-01",
+        "to": "2026-11-03",
+        "label": "Jan 1, 2025 – Nov 3, 2026",
+        "filenamePart": "01012025_to_03112026"
+      }
+    ],
+    "emptyRangePast": { "from": "2020-01-01", "to": "2020-01-05" },
+    "futureRangeStartDays": 1,
+    "futureRangeLengthDays": 25,
+    "invalidRangeSpanDays": 33
+  },
+  "chat": {
+    "columns": [
+      "No.",
+      "Conversation ID",
+      "Journey",
+      "Widget",
+      "Date & Time",
+      "Messages",
+      "Agent Outcome"
+    ],
+    "note": "The disposition and outcome filters and search fields are not applied.",
+    "journeyPickerName": "Journey All Journeys",
+    "allJourneys": "All Journeys",
+    "requiredFrom": "From*",
+    "requiredTo": "To*",
+    "messages": {
+      "bothRequired": "Both dates are required.",
+      "fromAfterTo": "From date must be before or equal to to date."
+    },
+    "fromDaysAgo": 30,
+    "journeySpanDays": 2,
+    "emptyRange": { "from": "2020-01-01", "to": "2020-01-02" },
+    "invalidRangeSpanDays": 2,
+    "filters": { "outcome": "Resolved", "search": "QA Voice" },
+    "dateTimePattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:(am|pm)$",
+    "noOutcomeValue": "-",
+    "outcomes": ["Resolved", "Action Required", "-"]
+  }
+}
