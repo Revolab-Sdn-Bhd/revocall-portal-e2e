@@ -1,0 +1,183 @@
+{
+  "page": {
+    "label": "Conversation Logs",
+    "path": "/dashboard/conversation-logs",
+    "heading": "Conversation Logs",
+    "enabled": true
+  },
+  "_note": "Staging data is live, so tests assert that rows match the filter, never exact counts. If a value below stops existing on staging, change it here.",
+  "columns": {
+    "call": [
+      "#",
+      "Contact number",
+      "Journey name",
+      "Date & time",
+      "Duration",
+      "Call disposition",
+      "Agent outcome"
+    ],
+    "chat": ["#", "Journey name", "Widget", "Date & time", "Messages", "Agent outcome"]
+  },
+  "formats": {
+    "dateTimePattern": "^\\d{1,2} [A-Z][a-z]{2} \\d{4}, \\d{1,2}:\\d{2} (AM|PM)$",
+    "durationPattern": "^\\d+m \\d+s$",
+    "numberPattern": "^\\d+$",
+    "conversationIdPattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+  },
+  "outcomeValues": {
+    "call": ["Resolved", "Action Required", "Escalated", "—"],
+    "chat": ["Resolved", "Action Required", "Dropped", "Escalated", "—"]
+  },
+  "filters": {
+    "journey": "UMobile latest",
+    "disposition": "Success",
+    "outcome": "Resolved",
+    "secondOutcome": "Action Required",
+    "chatWidget": "QA ReVa Cards Widget",
+    "chatJourney": "QA Voice Journey R",
+    "secondChatJourney": "QA-GD-Chat",
+    "secondChatWidget": "Raise Bank Chat Support",
+    "noRowsDisposition": "Failed",
+    "noResponseDisposition": "No Response",
+    "escalatedOutcome": "Escalated",
+    "droppedOutcome": "Dropped",
+    "callbackItem": "Callbacks",
+    "notCallbackItem": "Not callbacks"
+  },
+  "pageSize": {
+    "call": 20,
+    "chat": 10
+  },
+  "filterOptions": {
+    "callOutcomes": ["Resolved", "Action Required", "Escalated"],
+    "chatOutcomes": ["Resolved", "Action Required", "Dropped", "Escalated"],
+    "dispositions": [
+      "Success",
+      "Dropped",
+      "No Response",
+      "User Rejected",
+      "No Pickup",
+      "Insufficient Balance",
+      "Failed",
+      "Queue Timeout",
+      "Queue Abandoned",
+      "Insufficient Capacity",
+      "Max Duration Reached",
+      "Blocked",
+      "Voicemail"
+    ],
+    "dispositionsChecked": ["Success", "No Response", "Failed"],
+    "chatWidgets": [
+      "PCW Demo chat",
+      "QA PCW Chat Widget",
+      "QA ReVa Cards Widget",
+      "QA-GD Chat Widget",
+      "Raise Bank Chat Support",
+      "Zendesk Support Demo"
+    ],
+    "prdCallOutcomes": ["Resolved", "Action Required", "Dropped"]
+  },
+  "requestValues": {
+    "outcome": {
+      "Resolved": "RESOLVED",
+      "Action Required": "ACTION_REQUIRED",
+      "Escalated": "ESCALATED",
+      "Dropped": "DROPPED"
+    },
+    "disposition": {
+      "Success": "CALL_DISPOSITION_SUCCESS",
+      "No Response": "CALL_DISPOSITION_NO_RESPONSE",
+      "Failed": "CALL_DISPOSITION_FAILED"
+    }
+  },
+  "chipVariants": {
+    "Resolved": "chip--success",
+    "Action Required": "chip--warning",
+    "Escalated": "chip--accent"
+  },
+  "messages": {
+    "emptyCall": "No calls match your filters",
+    "emptyChat": "No chats match your filters",
+    "emptyHint": "Try a different search term or filter.",
+    "callbackTag": "Callback conversation.",
+    "testCallContact": "Test Call",
+    "placeholder": "—",
+    "searchPlaceholderCall": "Search journey, contact or conversation ID",
+    "searchPlaceholderChat": "Search journey, widget or conversation ID"
+  },
+  "search": {
+    "journeyTerm": "umobile",
+    "journeyTermCased": "UMobile",
+    "paddedTerm": "  UMobile  ",
+    "noMatch": "zzzzqqq",
+    "manyResults": "Raise",
+    "chatWidgetTerm": "Cards",
+    "scriptTerm": "<script>alert(1)</script>",
+    "sqlTerm": "' OR 1=1 --",
+    "idPrefixLength": 8
+  },
+  "urlParams": {
+    "disposition": "success",
+    "twoDispositions": "no_response%2Cfailed",
+    "unknownTab": "foo",
+    "unknownDisposition": "bogus"
+  },
+  "viewport": {
+    "width": 390,
+    "height": 800
+  },
+  "access": {
+    "callListPath": "/api/admin.calllog.v2.CallLogService/List",
+    "callListMessage": {
+      "skip": 0,
+      "limit": 20,
+      "client": "telephony"
+    },
+    "callExportCountPath": "/api/calllog/v2/export/count",
+    "chatExportPath": "/api/chatlog/v1/export.csv",
+    "exportRangeDaysAgo": 30,
+    "exportTimezone": "Asia/Kuala_Lumpur",
+    "unauthenticatedCode": "unauthenticated",
+    "profilePath": "/api/admin.user.v2.UserService/Profile",
+    "callSummaryPath": "/api/admin.calllog.v2.CallLogService/GetCallSummary",
+    "callToolCallsPath": "/api/admin.calllog.v2.CallLogService/GetToolCalls",
+    "permissionDeniedCode": "permission_denied",
+    "noAccessHomePattern": "/dashboard/?$",
+    "homeSidebarLabel": "Overview"
+  },
+  "sorting": {
+    "call": ["Contact number", "Date & time", "Duration"],
+    "callNotSortable": ["#", "Journey name", "Call disposition", "Agent outcome"],
+    "chat": ["Date & time", "Messages"]
+  },
+  "detailsTabs": {
+    "call": ["Summary", "Transcript", "Insights", "Sentiment", "Rating"],
+    "chat": ["Summary", "Transcription", "Tools", "Insights", "Sentiment", "Rating"],
+    "noExtraction": "No output extraction for this call.",
+    "noRating": "No rating was collected for this conversation.",
+    "sentimentLabels": ["Neutral", "Positive", "Negative"],
+    "audioLabel": "Audio (1)",
+    "downloadLink": "Download recording",
+    "noCredits": "Not charged",
+    "stillProcessing": "Extraction is still processing..."
+  },
+  "details": {
+    "call": {
+      "dialogName": "Call details",
+      "tabs": ["Summary", "Transcript"]
+    },
+    "chat": {
+      "dialogName": "Chat details",
+      "tabs": ["Summary"]
+    }
+  },
+  "export": {
+    "dialogName": "Export Conversation Logs",
+    "callHeading": "Calls",
+    "callFilenamePattern": "^conversation_log_\\d{8}_to_\\d{8}\\.xlsx$",
+    "chatFilenamePattern": "^chat-logs-\\d{4}-\\d{2}-\\d{2}-to-\\d{4}-\\d{2}-\\d{2}\\.csv$",
+    "chatNote": "The disposition and outcome filters and search fields are not applied.",
+    "chatFromDaysAgo": 30,
+    "downloadTimeoutMs": 120000
+  }
+}

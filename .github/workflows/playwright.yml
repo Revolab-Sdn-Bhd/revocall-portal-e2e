@@ -40,6 +40,12 @@ jobs:
       CHANGE_PWD_EMAIL: ${{ secrets.CHANGE_PWD_EMAIL }}
       CHANGE_PWD_PASSWORD: ${{ secrets.CHANGE_PWD_PASSWORD }}
       FAILED_LOGIN_EMAIL: ${{ secrets.FAILED_LOGIN_EMAIL }}
+      NO_ACCESS_EMAIL: ${{ secrets.NO_ACCESS_EMAIL }}
+      NO_ACCESS_PASSWORD: ${{ secrets.NO_ACCESS_PASSWORD }}
+      NO_ACCESS_ORGANIZATION: ${{ secrets.NO_ACCESS_ORGANIZATION }}
+      OTHER_ORG_EMAIL: ${{ secrets.OTHER_ORG_EMAIL }}
+      OTHER_ORG_PASSWORD: ${{ secrets.OTHER_ORG_PASSWORD }}
+      OTHER_ORG_ORGANIZATION: ${{ secrets.OTHER_ORG_ORGANIZATION }}
       # Optional: leave the variable unset to test staging (the config default).
       BASE_URL: ${{ vars.BASE_URL }}
     steps:
