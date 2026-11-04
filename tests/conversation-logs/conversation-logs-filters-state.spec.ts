@@ -117,8 +117,8 @@ test.describe('Conversation Logs - clear, empty and tabs', () => {
         requestValues.disposition[filters.noRowsDisposition],
       ]);
       expect(result.request.resolutions).toEqual([requestValues.outcome[filters.outcome]]);
-      await expect(logs.page.getByText(messages.emptyCall, { exact: true })).toBeVisible();
-      await expect(logs.page.getByText(messages.emptyHint, { exact: true })).toBeVisible();
+      await expect(logs.emptyMessage(messages.emptyCall)).toBeVisible();
+      await expect(logs.emptyMessage(messages.emptyHint)).toBeVisible();
       await logs.expectEmptyState();
       await logs.expectColumns(columns.call);
     },
@@ -139,7 +139,7 @@ test.describe('Conversation Logs - clear, empty and tabs', () => {
         const [result] = await logs.selectFilterValues('widget', [filters.chatWidget]);
 
         expect(result.total).toBe(0);
-        await expect(logs.page.getByText(messages.emptyChat, { exact: true })).toBeVisible();
+        await expect(logs.emptyMessage(messages.emptyChat)).toBeVisible();
         await logs.expectEmptyState();
         await logs.expectColumns(columns.chat);
       });

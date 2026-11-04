@@ -71,6 +71,8 @@ export class ConversationLogsPage {
   readonly clearSearchButton: Locator;
   readonly clearAllButton: Locator;
   readonly emptyHint: Locator;
+  /** Checkbox items of the open filter menu (e.g. the Journey options). */
+  readonly menuOptions: Locator;
   readonly table: Locator;
   /** The element around the table that scrolls sideways on a narrow screen. */
   readonly tableContainer: Locator;
@@ -105,6 +107,7 @@ export class ConversationLogsPage {
     this.clearSearchButton = page.getByRole('button', { name: 'Clear search', exact: true });
     this.clearAllButton = page.getByRole('button', { name: 'Clear all', exact: true });
     this.emptyHint = page.getByText('Try a different search term or filter.', { exact: true });
+    this.menuOptions = page.getByRole('menuitemcheckbox');
     this.showTestCallsSwitch = page.getByRole('switch');
     this.table = page.getByRole('table');
     // CSS parent: the scroll container has no role or name.
@@ -383,6 +386,11 @@ export class ConversationLogsPage {
     return this.page.getByText(
       this.tab === 'call' ? /^No calls match your/ : /^No chats match your/,
     );
+  }
+
+  /** An empty-state text from the test data (exact by default); `message` is the title or the hint line. */
+  emptyMessage(message: string, options: { exact?: boolean } = { exact: true }) {
+    return this.page.getByText(message, options);
   }
 
   async expectEmptyState() {

@@ -31,6 +31,7 @@ export class ConversationDetailsDialogComponent {
     this.selectedTab = this.dialog.getByRole('tab', { selected: true });
     // The Summary panel shows the summary text, then an "Explanation" label and its text.
     this.summaryExplanation = this.dialog.getByText('Explanation', { exact: true });
+    // CSS: the drawer backdrop has no role or name.
     this.backdrop = page.locator('[data-slot="drawer-backdrop"]');
     this.seekSlider = this.dialog.getByRole('slider', { name: 'Seek', exact: true });
     this.downloadRecordingLink = this.dialog.getByRole('link', {
@@ -107,6 +108,7 @@ export class ConversationDetailsDialogComponent {
 
   /** Chips in the panel that show one of the outcome names (data-slot is the design system's chip marker; chips have no role). */
   outcomeChips(outcomes: string[]) {
+    // CSS: chips have no role or name, and data-slot="chip" is the only marker the design system gives them.
     return this.dialog
       .locator('[data-slot="chip"]')
       .filter({ hasText: new RegExp(`^(${outcomes.map(escapeRegExp).join('|')})$`) });

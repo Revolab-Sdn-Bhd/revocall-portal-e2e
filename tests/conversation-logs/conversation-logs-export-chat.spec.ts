@@ -256,7 +256,7 @@ test.describe('Conversation Logs - Chat export', () => {
       await test.step('Apply the outcome filter and a search term on the page', async () => {
         await logs.selectFilterValues('outcome', [data.chat.filters.outcome]);
         const reloaded = logs.page.waitForResponse(isChatLogListCall);
-        await logs.page.getByRole('textbox', { name: /^Search/ }).fill(data.chat.filters.search);
+        await logs.searchBox.fill(data.chat.filters.search);
         await reloaded;
       });
 
@@ -346,7 +346,7 @@ test.describe('Conversation Logs - Chat export', () => {
       const dialog = logs.exportDialog;
 
       await logs.filterButton('journey').click();
-      const pageOptions = page.getByRole('menuitemcheckbox');
+      const pageOptions = logs.menuOptions;
       await expect(pageOptions.first()).toBeVisible();
       const expected = (await pageOptions.allInnerTexts()).map((text) => text.trim());
       await page.keyboard.press('Escape');

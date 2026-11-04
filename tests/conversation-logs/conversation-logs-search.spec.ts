@@ -99,7 +99,7 @@ test.describe('Conversation Logs - search', () => {
 
       const result = await logs.search(search.noMatch);
       expect(result.total).toBe(0);
-      await expect(logs.page.getByText(messages.emptyCall, { exact: true })).toBeVisible();
+      await expect(logs.emptyMessage(messages.emptyCall)).toBeVisible();
       await logs.expectEmptyState();
       await logs.expectColumns(columns.call);
 
@@ -212,7 +212,7 @@ test.describe('Conversation Logs - search', () => {
       await test.step('No match shows the Chat empty state and Clear search recovers', async () => {
         const result = await logs.search(search.noMatch);
         expect(result.total).toBe(0);
-        await expect(logs.page.getByText(messages.emptyChat, { exact: true })).toBeVisible();
+        await expect(logs.emptyMessage(messages.emptyChat)).toBeVisible();
         await logs.clearSearch();
         await expect(logs.footerText).toBeVisible();
       });

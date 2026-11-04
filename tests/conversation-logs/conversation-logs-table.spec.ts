@@ -187,7 +187,7 @@ test.describe('Conversation Logs - table content', () => {
       /* eslint-disable playwright/no-conditional-in-test, playwright/no-conditional-expect */
       if (result.total === 0) {
         await logs.expectEmptyState();
-        await expect(logs.page.getByText(messages.emptyChat)).toBeVisible();
+        await expect(logs.emptyMessage(messages.emptyChat, {})).toBeVisible();
       } else {
         await logs.expectEveryRowMatches('Agent outcome', [filters.droppedOutcome]);
       }
