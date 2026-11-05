@@ -15,18 +15,26 @@ test.describe('Conversation Logs - details panel tabs', () => {
   test(
     'should open every Call details tab and show its content',
     { tag: ['@regression', '@AT-CLOG-070'] },
-    async ({ conversationLogsPage: logs, conversationLogsData: data }) => {
+    async ({ page, conversationLogsPage: logs, conversationLogsData: data }) => {
       const { callDetails: panel } = logs;
       const { detailsTabs, filters, outcomeValues } = data;
 
       await logs.goto();
       await logs.selectFilterValues('outcome', [filters.outcome]);
       await logs.expectEveryRowMatches('Agent outcome', [filters.outcome]);
+      // The Tools tab is added after the tool calls load, and only for calls that used tools.
+      const toolCallsLoaded = page.waitForResponse(isCallLogRpc('GetToolCalls'));
       await logs.openFirstRow();
       await panel.expectOpen();
+      await toolCallsLoaded;
 
       await test.step('The tabs are in order and Summary is selected', async () => {
-        await expect(panel.tabs).toHaveText(detailsTabs.call);
+        // Tools (only on calls that used tools) is not part of the fixed set, so it is left out of the comparison.
+        await expect
+          .poll(async () =>
+            (await panel.tabs.allInnerTexts()).filter((name) => name !== detailsTabs.callToolsTab),
+          )
+          .toEqual(detailsTabs.call);
         await expect(panel.selectedTab).toHaveText(detailsTabs.call[0]);
       });
 
@@ -39,12 +47,12 @@ test.describe('Conversation Logs - details panel tabs', () => {
         await panel.openTab('Transcript', isCallLogRpc('GetTranscription'));
         await expect(panel.summaryExplanation).toBeHidden();
         // Emotion labels are not asserted: whether a turn has one depends on the call.
-        await expectContent(panel, detailsTabs.call, /\S{2,}\s+\S{2,}/);
+        await expectContent(panel, /\S{2,}\s+\S{2,}/);
       });
 
       await test.step('Insights: extracted fields or the "no extraction" text', async () => {
         await panel.openTab('Insights', isCallLogRpc('GetCallOutputExtraction'));
-        await expectContent(panel, detailsTabs.call);
+        await expectContent(panel);
       });
 
       await test.step('Sentiment: a label and its reason', async () => {
@@ -54,7 +62,7 @@ test.describe('Conversation Logs - details panel tabs', () => {
 
       await test.step('Rating: a rating or the "not collected" text', async () => {
         await panel.openTab('Rating', isCallLogRpc('GetCallRating'));
-        await expectContent(panel, detailsTabs.call);
+        await expectContent(panel);
       });
 
       await expect(panel.dialog).not.toContainText(ERROR_TEXT);
@@ -99,7 +107,7 @@ test.describe('Conversation Logs - details panel tabs', () => {
 
       await test.step('Insights: extracted fields or one of the two status texts', async () => {
         await panel.openTab('Insights');
-        await expectContent(panel, detailsTabs.chat);
+        await expectContent(panel);
       });
 
       await test.step('Sentiment: a label and its reason', async () => {
@@ -109,7 +117,7 @@ test.describe('Conversation Logs - details panel tabs', () => {
 
       await test.step('Rating: a rating or the "not collected" text', async () => {
         await panel.openTab('Rating');
-        await expectContent(panel, detailsTabs.chat);
+        await expectContent(panel);
       });
 
       await expect(panel.dialog).not.toContainText(ERROR_TEXT);
@@ -161,9 +169,10 @@ test.describe('Conversation Logs - details panel tabs', () => {
     'should close the Call and Chat details with Close, Escape and a click outside',
     { tag: ['@regression', '@AT-CLOG-073'] },
     async ({ conversationLogsPage: logs }) => {
+      // One page load: the Call tab is the default, and the Chat tab is reached by switching tabs.
+      await logs.goto();
       for (const tab of ['call', 'chat'] as const) {
         await test.step(`${tab} tab`, async () => {
-          await logs.goto();
           await logs.selectTab(tab);
           const panel = { call: logs.callDetails, chat: logs.chatDetails }[tab];
           const footerBefore = await logs.footerText.textContent();
@@ -217,7 +226,7 @@ test.describe('Conversation Logs - details panel tabs', () => {
       });
 
       await test.step('First row of the Escalated list', async () => {
-        await logs.goto();
+        // Filtering from page 2 is enough: the new list replaces the old one, no second page load needed.
         await logs.selectFilterValues('outcome', [filters.escalatedOutcome]);
         await logs.expectEveryRowMatches('Agent outcome', [filters.escalatedOutcome]);
         const id = String(logs.latestList.data[0].id);
@@ -329,16 +338,17 @@ test.describe('Conversation Logs - details panel tabs', () => {
 });
 
 /**
- * The text of the open tab: whatever follows the tab names in the dialog. Polled, because the content
+ * The text of the open tab: whatever follows the tab names (as currently shown) in the dialog. Polled, because the content
  * arrives after the tab is selected. Insights and Rating may legitimately say "nothing extracted" or
  * "no rating", so any text counts there; an error text never does (checked at the end of each test).
  */
-async function expectContent(panel: { dialog: Locator }, tabs: string[], pattern = /\S/) {
+async function expectContent(panel: { dialog: Locator; tabs: Locator }, pattern = /\S/) {
   await expect
     .poll(
       async () => {
         const text = await panel.dialog.innerText();
-        const marker = tabs.join('\n');
+        // The tabs as shown now: a call's Tools tab is only there when the call used tools.
+        const marker = (await panel.tabs.allInnerTexts()).join('\n');
         const at = text.indexOf(marker);
         return at < 0 ? '' : text.slice(at + marker.length).trim();
       },

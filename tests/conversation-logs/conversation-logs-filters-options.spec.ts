@@ -87,7 +87,7 @@ test.describe('Conversation Logs - filter options and multi-select', () => {
       conversationLogsPage: logs,
       conversationLogsData: { filterOptions, requestValues },
     }) => {
-      await test.step('The menu offers the 13 staging dispositions', async () => {
+      await test.step('The menu offers the 16 staging dispositions', async () => {
         await logs.goto();
         const { names } = await logs.readFilterOptions('disposition');
         expect(names).toEqual(filterOptions.dispositions);

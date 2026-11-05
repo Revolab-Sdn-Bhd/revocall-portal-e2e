@@ -13,8 +13,12 @@ const STAGING_URL = 'https://admin.stg.revocall-staging.com';
 
 export default defineConfig({
   testDir: './tests',
-  // Demo mode (slow motion + highlighted checks) needs more time per test.
-  timeout: process.env.DEMO ? 120_000 : 30_000,
+  // Demo mode (slow motion + highlighted checks) needs more time per test. Staging answers about 3x slower
+  // from the CI runners than from a laptop (run #13: 26 min against 9 min), so CI gets a longer budget
+  // instead of tests with their own waits. A hang still fails, only later.
+  timeout: process.env.DEMO ? 120_000 : process.env.CI ? 90_000 : 30_000,
+  // Assertions and polls: 5 s locally, 15 s in CI for the same reason.
+  expect: { timeout: process.env.CI ? 15_000 : 5_000 },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -28,6 +32,10 @@ export default defineConfig({
 
     // Users are in Malaysia, and exports label times in the browser's time zone. CI runners are UTC.
     timezoneId: 'Asia/Kuala_Lumpur',
+
+    // Slow staging from CI: allow a page load 60 s and a single action 30 s (locally the 30 s test timeout caps both).
+    navigationTimeout: process.env.CI ? 60_000 : undefined,
+    actionTimeout: process.env.CI ? 30_000 : undefined,
 
     // CFG-01: keep evidence of failures.
     trace: 'on-first-retry',

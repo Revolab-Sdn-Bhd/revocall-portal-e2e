@@ -125,7 +125,9 @@ export class ConversationLogsPage {
   /** Opens the page directly (Call tab is the default) and waits for the first list. */
   async goto() {
     const listLoaded = this.page.waitForResponse(isListCall.call);
-    await this.page.goto(this.names.path);
+    // The list response below proves the page is ready, so there is no need to wait for the load event
+    // (slow third-party assets on a slow staging).
+    await this.page.goto(this.names.path, { waitUntil: 'domcontentloaded' });
     this.latest = await this.readListResponse(await listLoaded);
     this.tab = 'call';
     await this.expectListLoaded();
@@ -323,7 +325,7 @@ export class ConversationLogsPage {
   /** Opens the page at `/dashboard/conversation-logs<query>` (e.g. "?tab=chat") and waits for the list of `tab`. */
   async gotoWithQuery(query: string, tab: LogTab) {
     const listLoaded = this.page.waitForResponse(isListCall[tab]);
-    await this.page.goto(`${this.names.path}${query}`);
+    await this.page.goto(`${this.names.path}${query}`, { waitUntil: 'domcontentloaded' });
     this.latest = await this.readListResponse(await listLoaded);
     this.tab = tab;
   }

@@ -52,6 +52,9 @@
     "callOutcomes": ["Resolved", "Action Required", "Escalated"],
     "chatOutcomes": ["Resolved", "Action Required", "Dropped", "Escalated"],
     "dispositions": [
+      "Busy",
+      "Unreachable",
+      "Invalid Number",
       "Success",
       "Dropped",
       "No Response",
@@ -153,6 +156,7 @@
   "detailsTabs": {
     "call": ["Summary", "Transcript", "Insights", "Sentiment", "Rating"],
     "chat": ["Summary", "Transcription", "Tools", "Insights", "Sentiment", "Rating"],
+    "callToolsTab": "Tools",
     "noExtraction": "No output extraction for this call.",
     "noRating": "No rating was collected for this conversation.",
     "sentimentLabels": ["Neutral", "Positive", "Negative"],
