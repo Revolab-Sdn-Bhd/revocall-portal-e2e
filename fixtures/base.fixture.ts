@@ -131,6 +131,7 @@ export type ConversationLogsData = {
   detailsTabs: {
     call: string[];
     chat: string[];
+    callToolsTab: string;
     noExtraction: string;
     stillProcessing: string;
     noRating: string;
